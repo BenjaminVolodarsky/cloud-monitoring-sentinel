@@ -1,0 +1,33 @@
+name: build-and-publish
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build binaries
+        run: |
+          mkdir -p dist/latest dist/${GITHUB_REF_NAME}
+
+          GOOS=darwin GOARCH=arm64 go build -o dist/latest/upctl-darwin-arm64
+          GOOS=darwin GOARCH=amd64 go build -o dist/latest/upctl-darwin-amd64
+
+          cp dist/latest/* dist/${GITHUB_REF_NAME}/
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .
