@@ -1,0 +1,40 @@
+version: 2
+
+project_name: upctl
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: upctl
+    main: .
+    binary: upctl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/BenjaminVolodarsky/cloud-monitoring-sentinel/internal/buildinfo.Version={{.Version}}
+      - -X github.com/BenjaminVolodarsky/cloud-monitoring-sentinel/internal/buildinfo.Commit={{.Commit}}
+      - -X github.com/BenjaminVolodarsky/cloud-monitoring-sentinel/internal/buildinfo.Date={{.Date}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  github:
+    owner: BenjaminVolodarsky
+    name: cloud-monitoring-sentinel
